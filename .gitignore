@@ -268,3 +268,9 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+benchmark/demo.glb
+benchmark/core.modern.js
+benchmark/core.modern.js.map
+benchmark/functions.modern.js
+benchmark/functions.modern.js.map
