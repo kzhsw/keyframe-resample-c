@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table#result {
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        td {
+            border: 1px solid;
+        }
+
+        tr {
+            border: 1px solid;
+        }
+
+        th {
+            border: 1px solid;
+        }
+    </style>
+</head>
+<body>
+<p>
+    <label>
+        Warmup
+        <input type="number" step="1" min="1" id="warmup" value="5">
+    </label>
+    <label>
+        Run
+        <input type="number" step="1" min="1" id="run" value="5">
+    </label>
+    <button type="button" id="benchmark">Benchmark</button>
+</p>
+<p>
+    Status: <span id="status">Idle</span>
+</p>
+<p>
+    Note: This benchmark code uses
+    <a href="https://caniuse.com/mdn-api_worker_worker_ecmascript_modules">esm workers</a>
+    , might not work on older browsers.
+    If using Firefox, version >= 111 and <code>dom.workers.modules.enabled</code> is required.
+</p>
+<table id="result">
+    <tr>
+        <th>Type</th>
+        <th>Wasm Memory</th>
+        <th>Time Escaped (ms)</th>
+        <th>Before Length</th>
+        <th>Before Frames</th>
+        <th>After Length</th>
+        <th>After Frames</th>
+        <th>Frame Throughput</th>
+        <th>Byte Throughput</th>
+        <th>Ratio</th>
+    </tr>
+</table>
+<script type="module" src="benchmark-main.js"></script>
+</body>
+</html>
