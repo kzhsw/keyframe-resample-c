@@ -16,6 +16,13 @@ declare type ResampleUnknownFn = (
     count: number, tolerance: number
 ) => number;
 
+declare const enum GltfComponentType {
+    BYTE = 5120,
+    UNSIGNED_BYTE = 5121,
+    SHORT = 5122,
+    UNSIGNED_SHORT = 5123,
+}
+
 export declare interface AnimationResampleExports extends WebAssembly.Exports {
     readonly memory: WebAssembly.Memory;
     get_heap_ptr(): number;
@@ -24,6 +31,8 @@ export declare interface AnimationResampleExports extends WebAssembly.Exports {
         values: number, value_size: number, value_stride: number,
         count: number
     ): number;
+    normalize(ptr: number, length: number, component_type: number): number;
+    denormalize(ptr: number, length: number, component_type: number): number;
     readonly step_unknown: ResampleUnknownFn;
     readonly lerp_unknown: ResampleUnknownFn;
     readonly onlerp_quat: ResampleFn;
@@ -38,22 +47,31 @@ export declare interface AnimationResampleExports extends WebAssembly.Exports {
     readonly step_scalar: ResampleFn;
 }
 
-declare type AnimationResampleWrapperUnknownFn = (
-    frames: Float32Array,
-    values: Float32Array,
-    elementSize: number,
-    tolerance: number
-) => {frames: Float32Array, values: Float32Array};
 
-declare type AnimationResampleWrapperFn = (
-    frames: Float32Array,
-    values: Float32Array,
-    tolerance: number
-) => {frames: Float32Array, values: Float32Array};
+/**
+ * Internal representing supported typed array classes
+ * @hidden
+ */
+export declare type TypedArray = Float32Array | Uint16Array | Uint8Array | Int16Array | Int8Array;
+
+
+declare type AnimationResampleWrapperUnknownFn = <T extends TypedArray>(
+    frames: T,
+    values: T,
+    elementSize: number,
+    tolerance: number,
+    normalize?: GltfComponentType | number
+) => {frames: T, values: T};
+
+declare type AnimationResampleWrapperFn = <T extends TypedArray>(
+    frames: T,
+    values: T,
+    tolerance: number,
+    normalize?: GltfComponentType | number
+) => {frames: T, values: T};
 
 export declare interface AnimationResampleWrapper {
     readonly instance: AnimationResampleInstance;
-    module?: WebAssembly.Module;
 
     readonly step_unknown: AnimationResampleWrapperUnknownFn;
     readonly lerp_unknown: AnimationResampleWrapperUnknownFn;

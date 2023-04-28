@@ -5,15 +5,15 @@ WASIROOT?=$(WASI_SDK)/share/wasi-sysroot
 
 WASM_FLAGS=--target=wasm32-wasi --sysroot=$(WASIROOT) -fno-builtin -ffreestanding -fno-ident -nostartfiles -Wl,--gc-sections,--no-entry,--export-dynamic,--initial-memory=65536,-z,stack-size=8192
 
-WASM_EXPORTS=-Wl,--export=slerp_quat,--export=lerp_vec4,--export=lerp_vec3,--export=lerp_vec2,--export=lerp_scalar,--export=step_vec4,--export=step_vec3,--export=step_vec2,--export=step_scalar,--export=step_unknown,--export=lerp_unknown,--export=stream_continue,--export=get_heap_ptr
+WASM_EXPORTS=-Wl,--export=slerp_quat,--export=lerp_vec4,--export=lerp_vec3,--export=lerp_vec2,--export=lerp_scalar,--export=step_vec4,--export=step_vec3,--export=step_vec2,--export=step_scalar,--export=step_unknown,--export=lerp_unknown,--export=denormalize,--export=normalize,--export=stream_continue,--export=get_heap_ptr
 
 js: $(BUILD)/resample_wasm.js $(BUILD)/resample_simd.js
 
-$(BUILD)/resample_wasm.wasm: resample.c
+$(BUILD)/resample_wasm.wasm: resample.c normalize.c
 	@mkdir -p $(BUILD)
 	$(WASMCC) $^ $(CFLAGS) $(WASM_FLAGS) $(WASM_EXPORTS) -o $@
 
-$(BUILD)/resample_simd.wasm: resample.c
+$(BUILD)/resample_simd.wasm: resample.c normalize.c
 	@mkdir -p $(BUILD)
 	$(WASMCC) $^ $(CFLAGS) -msimd128 $(WASM_FLAGS) $(WASM_EXPORTS) -o $@
 

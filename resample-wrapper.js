@@ -23,15 +23,16 @@ export function makeWrapper(instance) {
 
     /**
      *
-     * @param {Float32Array} frames
-     * @param {Float32Array} values
+     * @param {import('./resample').TypedArray} frames
+     * @param {import('./resample').TypedArray} values
      * @param {number} tolerance
      * @param {number} elementSize
+     * @param {number?} normalize
      * @param {import('./resample').ResampleFn} callWasm
      */
     function resampleInternal(
             frames, values,
-            tolerance, elementSize,
+            tolerance, elementSize, normalize,
             callWasm
     ) {
         const chunkSize = (memory.length / (elementSize + 1)) | 0;
@@ -88,6 +89,13 @@ export function makeWrapper(instance) {
                         currWasmValueOffset);
                 currChunkSize = lastChunkSize;
             }
+            if (normalize && normalize !== 5126) {
+                instance.exports.denormalize(
+                    wasmValuePtr,
+                    elementSize * (currChunkSize + offset),
+                    normalize
+                );
+            }
             let writeCount = callWasm(
                     wasmFramePtr, 1,
                     wasmValuePtr, elementSize,
@@ -100,6 +108,13 @@ export function makeWrapper(instance) {
                                 wasmFrameOffset,
                                 wasmFrameOffset + writeCount),
                         frameWriteOffset);
+            }
+            if (normalize && normalize !== 5126) {
+                instance.exports.normalize(
+                    wasmValuePtr,
+                    elementSize * (currChunkSize + offset),
+                    normalize
+                );
             }
             if (valueWriteOffset !== valueReadOffset || writeCount !== currChunkSize) {
                 // copy only if needed
@@ -123,14 +138,18 @@ export function makeWrapper(instance) {
 
     function resampleFunction(wasmFn, elementSize) {
         /**
-         * @param {Float32Array} frames
-         * @param {Float32Array} values
+         * @param {import('./resample').TypedArray} frames
+         * @param {import('./resample').TypedArray} values
          * @param {number} tolerance
-         * @return {{frames: Float32Array, values: Float32Array}}
+         * @param {number?} normalize
+         * @return {{frames: import('./resample').TypedArray, values: import('./resample').TypedArray}}
          */
-        function resample(frames, values, tolerance) {
+        function resample(
+            frames, values,
+            tolerance, normalize
+        ) {
             if (!tolerance) tolerance = epsilon;
-            return resampleInternal(frames, values, tolerance, elementSize, (
+            return resampleInternal(frames, values, tolerance, elementSize, normalize, (
                     frames, frame_stride,
                     values, value_stride,
                     count, tolerance
@@ -149,14 +168,15 @@ export function makeWrapper(instance) {
          * @param {Float32Array} values
          * @param {number} elementSize
          * @param {number} tolerance
+         * @param {number?} normalize
          * @return {{frames: Float32Array, values: Float32Array}}
          */
         function resample(
                 frames, values,
-                elementSize, tolerance
+                elementSize, tolerance, normalize
         ) {
             if (!tolerance) tolerance = epsilon;
-            return resampleInternal(frames, values, tolerance, elementSize, (
+            return resampleInternal(frames, values, tolerance, elementSize, normalize, (
                     frames, frame_stride,
                     values, value_stride,
                     count, tolerance
