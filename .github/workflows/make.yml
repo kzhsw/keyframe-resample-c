@@ -33,3 +33,8 @@ jobs:
     - name: make
       run: make -j$(nproc) WASI_SDK="${{github.workspace}}/wasi-sdk-${{matrix.wasi_sdk_version}}.0/" WASM_OPT="${{github.workspace}}/binaryen-version_112/bin/wasm-opt"
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: build-${{matrix.wasi_sdk_version}}
+        path: ${{github.workspace}}/build
+
