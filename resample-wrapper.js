@@ -1,4 +1,6 @@
 /**
+ * Create js wrapper for simpler usage
+ *
  * @param {import('./resample.d.ts').AnimationResampleInstance} instance
  * @return {import('./resample.d.ts').AnimationResampleWrapper}
  */
