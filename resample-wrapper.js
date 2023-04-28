@@ -1,6 +1,6 @@
 /**
- * @param {import('./animation-resample.d.ts').AnimationResampleInstance} instance
- * @return {import('./animation-resample.d.ts').AnimationResampleWrapper}
+ * @param {import('./resample.d.ts').AnimationResampleInstance} instance
+ * @return {import('./resample.d.ts').AnimationResampleWrapper}
  */
 export function makeWrapper(instance) {
     // heapPtr is aligned with 16 bytes
@@ -27,11 +27,12 @@ export function makeWrapper(instance) {
      * @param {Float32Array} values
      * @param {number} tolerance
      * @param {number} elementSize
-     * @param {import('./animation-resample').ResampleFn} callWasm
+     * @param {import('./resample').ResampleFn} callWasm
      */
     function resampleInternal(
             frames, values,
-            tolerance, elementSize, callWasm
+            tolerance, elementSize,
+            callWasm
     ) {
         const chunkSize = (memory.length / (elementSize + 1)) | 0;
         const valueChunk = elementSize * chunkSize;
