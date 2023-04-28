@@ -21,6 +21,9 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  wasi_version: 20
+
 jobs:
   # Single deploy job since we're just deploying
   deploy:
@@ -37,8 +40,8 @@ jobs:
       - name: Downloading wasi-sdk
         run: |
           cd ${{github.workspace}}
-          wget --no-verbose https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${{matrix.wasi_sdk_version}}/wasi-sdk-${{matrix.wasi_sdk_version}}.0-linux.tar.gz
-          tar xf wasi-sdk-${{matrix.wasi_sdk_version}}.0-linux.tar.gz
+          wget --no-verbose https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${{env.wasi_sdk_version}}/wasi-sdk-${{env.wasi_sdk_version}}.0-linux.tar.gz
+          tar xf wasi-sdk-${{env.wasi_sdk_version}}.0-linux.tar.gz
 
       - name: Downloading binaryen
         run: |
@@ -47,7 +50,7 @@ jobs:
           tar xf binaryen-version_112-x86_64-linux.tar.gz
 
       - name: make
-        run: make -j$(nproc) WASI_SDK="${{github.workspace}}/wasi-sdk-${{matrix.wasi_sdk_version}}.0/" WASM_OPT="${{github.workspace}}/binaryen-version_112/bin/wasm-opt"
+        run: make -j$(nproc) WASI_SDK="${{github.workspace}}/wasi-sdk-${{env.wasi_sdk_version}}.0/" WASM_OPT="${{github.workspace}}/binaryen-version_112/bin/wasm-opt"
 
       - name: Downloading test file
         run: |
