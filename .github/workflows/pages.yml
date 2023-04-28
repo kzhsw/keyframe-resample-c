@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  wasi_version: 20
+  wasi_sdk_version: 20
 
 jobs:
   # Single deploy job since we're just deploying
