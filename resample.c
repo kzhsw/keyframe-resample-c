@@ -689,6 +689,13 @@ resample_lerp_stream(
     glm_quat_copy);
 #endif
 
+#undef vec3_copy
+#undef scalar_copy
+#undef unknown_copy
+#undef resample_finalize
+#undef resample_step_stream
+#undef resample_lerp_stream
+
 #if defined(__x86_64__)
 void test1()
 {
