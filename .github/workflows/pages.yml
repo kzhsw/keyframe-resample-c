@@ -23,6 +23,7 @@ concurrency:
 
 env:
   wasi_sdk_version: 20
+  binaryen_version: 112
 
 jobs:
   # Single deploy job since we're just deploying
@@ -46,22 +47,28 @@ jobs:
       - name: Downloading binaryen
         run: |
           cd ${{github.workspace}}
-          wget --no-verbose https://github.com/WebAssembly/binaryen/releases/download/version_112/binaryen-version_112-x86_64-linux.tar.gz
-          tar xf binaryen-version_112-x86_64-linux.tar.gz
+          wget --no-verbose https://github.com/WebAssembly/binaryen/releases/download/version_${{env.binaryen_version}}/binaryen-version_${{env.binaryen_version}}-x86_64-linux.tar.gz
+          tar xf binaryen-version_${{env.binaryen_version}}-x86_64-linux.tar.gz
 
       - name: make
-        run: make -j$(nproc) WASI_SDK="${{github.workspace}}/wasi-sdk-${{env.wasi_sdk_version}}.0/" WASM_OPT="${{github.workspace}}/binaryen-version_112/bin/wasm-opt"
+        run: make -j$(nproc) WASI_SDK="${{github.workspace}}/wasi-sdk-${{env.wasi_sdk_version}}.0/" WASM_OPT="${{github.workspace}}/binaryen-version_${{env.binaryen_version}}/bin/wasm-opt"
 
       - name: Downloading test file
         run: |
           cd ${{github.workspace}}
           wget --no-verbose https://github.com/donmccurdy/glTF-Transform/files/8081046/Archive.zip
           unzip Archive.zip
-          rm -rf __MACOSX Arm-resampled.glb
+          rm -rf __MACOSX Arm-resampled.glb Archive.zip
           mv Arm.glb benchmark/demo.glb
 
       - name: cleanup
-        run: rm -rf cglm
+        run: |
+          cd ${{github.workspace}}
+          rm -rf cglm
+          rm -f wasi-sdk-${{env.wasi_sdk_version}}.0-linux.tar.gz
+          rm -f binaryen-version_${{env.binaryen_version}}-x86_64-linux.tar.gz
+          rm -rf wasi-sdk-${{env.wasi_sdk_version}}.0
+          rm -rf binaryen-version_${{env.binaryen_version}}
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
