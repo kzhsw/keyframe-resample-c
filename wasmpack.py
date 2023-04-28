@@ -46,10 +46,15 @@ def stats(buffer):
 with open(sys.argv[-1], 'rb') as fd:
     table = stats(fd)[:60]
 
-encoded = "";
+encoded = ""
 
 with open(sys.argv[-1], 'rb') as fd:
     encoded = encode(fd)
+
+export_prefix = "export const "
+
+if sys.argv[-3] == 'cjs':
+    export_prefix = "module.exports."
 
 print("""const encoded = "%s";
 
@@ -68,4 +73,4 @@ function unpack(data) {
     return result.buffer.slice(0, write);
 }
 
-export const %s = unpack(encoded);""" % (encoded, table, sys.argv[-2]))
+%s%s = unpack(encoded);""" % (encoded, table, export_prefix, sys.argv[-2]))
