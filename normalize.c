@@ -10,6 +10,8 @@
 #define DENORMALIZE_I16_SCALAR (1.f / NORMALIZE_I16_SCALAR)
 #define DENORMALIZE_U16_SCALAR (1.f / NORMALIZE_U16_SCALAR)
 
+//#define NORMALIZE_SIMD_UNROLL
+
 #if defined(CGLM_SIMD_WASM)
 static inline void normalize_internal(float *ptr, const size_t length, const float scalar)
 {
@@ -17,6 +19,7 @@ static inline void normalize_internal(float *ptr, const size_t length, const flo
     size_t num;
     num = length;
     v1 = wasm_f32x4_splat(scalar);
+#ifdef NORMALIZE_SIMD_UNROLL
     // loop unrolling
     while (num > 15)
     {
@@ -39,7 +42,7 @@ static inline void normalize_internal(float *ptr, const size_t length, const flo
         ptr += 16;
         num -= 16;
     }
-
+#endif
     while (num > 3)
     {
         v2 = glmm_load(ptr);
@@ -62,6 +65,9 @@ static inline void normalize_internal(float *ptr, const size_t length, const flo
 #define denormalize_max_u(v, min_val)
 #define denormalize_scalar_i(scalar, min_val) *ptr = fmaxf((*ptr) * (scalar), min_val)
 #define denormalize_scalar_u(scalar, min_val) *ptr = (*ptr) * (scalar)
+
+#ifdef NORMALIZE_SIMD_UNROLL
+
 #define denormalize_fn(name, max_simd_fn, scalar_fn)                             \
     static inline void name(float *ptr, const size_t length, const float scalar) \
     {                                                                            \
@@ -110,6 +116,37 @@ static inline void normalize_internal(float *ptr, const size_t length, const flo
             num--;                                                               \
         }                                                                        \
     }
+
+#else
+
+#define denormalize_fn(name, max_simd_fn, scalar_fn)                             \
+    static inline void name(float *ptr, const size_t length, const float scalar) \
+    {                                                                            \
+        glmm_128 v1, v2, v3;                                                     \
+        size_t num;                                                              \
+        num = length;                                                            \
+        v1 = wasm_f32x4_splat(scalar);                                           \
+        v2 = wasm_f32x4_const_splat(-1.f);                                       \
+                                                                                 \
+        while (num > 3)                                                          \
+        {                                                                        \
+            v3 = glmm_load(ptr);                                                 \
+            v3 = wasm_f32x4_mul(v3, v1);                                         \
+            max_simd_fn(v3, v2);                                                 \
+            glmm_store(ptr, v3);                                                 \
+            ptr += 4;                                                            \
+            num -= 4;                                                            \
+        }                                                                        \
+                                                                                 \
+        while (num > 0)                                                          \
+        {                                                                        \
+            scalar_fn(DENORMALIZE_I8_SCALAR, -1.f);                              \
+            ptr++;                                                               \
+            num--;                                                               \
+        }                                                                        \
+    }
+
+#endif
 
 denormalize_fn(denormalize_i, denormalize_max_i, denormalize_scalar_i);
 denormalize_fn(denormalize_u, denormalize_max_u, denormalize_scalar_u);
