@@ -229,6 +229,52 @@ CGLM_INLINE float quat_get_angle(versor a, versor b)
     return acosf(2.f * dotproduct * dotproduct - 1.f);
 }
 
+/*!
+ * @brief interpolates between two quaternions
+ *        using spherical linear interpolation (SLERP)
+ *
+ * @param[in]   from  from
+ * @param[in]   to    to
+ * @param[in]   t     amout
+ * @param[out]  dest  result quaternion
+ */
+CGLM_INLINE
+void
+glm_quat_slerp_precise(versor from, versor to, float t, versor dest) {
+    CGLM_ALIGN(16) vec4 q1, q2;
+    float cosTheta, sinTheta, angle;
+
+    cosTheta = glm_quat_dot(from, to);
+    glm_quat_copy(from, q1);
+
+    if (fabsf(cosTheta) >= 1.0f) {
+        glm_quat_copy(q1, dest);
+        return;
+    }
+
+    /* If cosTheta < 0, the interpolation will take the long way around the sphere. */
+    /* To fix this, one quat must be negated. */
+    if (cosTheta < 0.0f) {
+        glm_vec4_negate(q1);
+        cosTheta = -cosTheta;
+    }
+
+    /* LERP to avoid zero division */
+    if (cosTheta > 0.99999f) {
+        glm_quat_lerp(from, to, t, dest);
+        return;
+    }
+
+    /* SLERP */
+    angle = acosf(cosTheta);
+    sinTheta = sinf(angle);
+    glm_vec4_scale(q1, sinf((1.0f - t) * angle), q1);
+    glm_vec4_scale(to, sinf(t * angle), q2);
+
+    glm_vec4_add(q1, q2, q1);
+    glm_vec4_scale(q1, 1.0f / sinTheta, dest);
+}
+
 CGLM_INLINE bool keep_quat_slerp(
     versor left, versor middle, versor right,
     const float t, const float tolerance)
@@ -239,7 +285,7 @@ CGLM_INLINE bool keep_quat_slerp(
     }
     versor slerp_result;
     // slerp is slow...
-    glm_quat_slerp(left, right, t, slerp_result);
+    glm_quat_slerp_precise(left, right, t, slerp_result);
 #if defined(CGLM_SIMD_WASM)
     return !is_equals_f32x4(glmm_load(slerp_result), glmm_load(middle), tolerance);
 #else
