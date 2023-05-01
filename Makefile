@@ -1,5 +1,5 @@
 BUILD=build
-CFLAGS=-O3 -DNDEBUG -Wall -flto -std=c11
+CFLAGS=-O3 -DNDEBUG -Wall -flto -std=c11 -ffast-math -ffp-contract=fast -funsafe-math-optimizations -fno-stack-protector -fno-exceptions
 WASMCC?=$(WASI_SDK)/bin/clang
 WASIROOT?=$(WASI_SDK)/share/wasi-sysroot
 
