@@ -94,7 +94,9 @@ export function makeWrapper(instance) {
             if (normalize && normalize !== 5126) {
                 instance.exports.denormalize(
                     wasmValuePtr,
-                    elementSize * (currChunkSize + offset),
+                    elementSize,
+                    elementSize,
+                    currChunkSize + offset,
                     normalize
                 );
             }
@@ -114,7 +116,9 @@ export function makeWrapper(instance) {
             if (normalize && normalize !== 5126) {
                 instance.exports.normalize(
                     wasmValuePtr,
-                    elementSize * (currChunkSize + offset),
+                    elementSize,
+                    elementSize,
+                    currChunkSize + offset,
                     normalize
                 );
             }

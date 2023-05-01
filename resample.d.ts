@@ -31,8 +31,16 @@ export declare interface AnimationResampleExports extends WebAssembly.Exports {
         values: number, value_size: number, value_stride: number,
         count: number
     ): number;
-    normalize(ptr: number, length: number, component_type: number): number;
-    denormalize(ptr: number, length: number, component_type: number): number;
+    normalize(
+        ptr: number,
+        size: number, stride: number, count: number,
+        component_type: number
+    ): number;
+    denormalize(
+        ptr: number,
+        size: number, stride: number, count: number,
+        component_type: number
+    ): number;
     readonly step_unknown: ResampleUnknownFn;
     readonly lerp_unknown: ResampleUnknownFn;
     readonly onlerp_quat: ResampleFn;
