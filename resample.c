@@ -229,6 +229,61 @@ CGLM_INLINE float quat_get_angle(versor a, versor b)
     return acosf(2.f * dotproduct * dotproduct - 1.f);
 }
 
+#if defined(CGLM_SIMD_WASM)
+
+/*!
+ * @brief interpolates between two quaternions
+ *        using spherical linear interpolation (SLERP)
+ *
+ * @param[in]   from  from
+ * @param[in]   to    to
+ * @param[in]   t     amout
+ * @param[out]  dest  result quaternion
+ */
+CGLM_INLINE
+void
+glm_quat_slerp_precise(versor from, versor to, float t, versor dest) {
+    glmm_128 q1, q2, r1, r2;
+    float cosTheta, sinTheta, angle;
+
+    q1 = glmm_load(from);
+    q2 = glmm_load(to);
+    cosTheta = glmm_dot(q1, q2);
+
+    if (fabsf(cosTheta) >= 1.0f) {
+        glmm_store(dest, q1);
+        return;
+    }
+
+    /* If cosTheta < 0, the interpolation will take the long way around the sphere. */
+    /* To fix this, one quat must be negated. */
+    if (cosTheta < 0.0f) {
+        wasm_f32x4_neg(q1);
+        cosTheta = -cosTheta;
+    }
+
+    /* LERP to avoid zero division */
+    if (cosTheta > 0.99999f) {
+        // the simd lerp
+        q2 = wasm_f32x4_sub(q2, q1);
+        // note that there is no glm_clamp_zo in glm_vec4_lerp
+        q2 = wasm_f32x4_mul(glmm_set1(t), q2);
+        q2 = wasm_f32x4_add(q1, q2);
+        glmm_store(dest, q2);
+        return;
+    }
+
+    /* SLERP */
+    angle = acosf(cosTheta);
+    sinTheta = sinf(angle);
+    r1 = wasm_f32x4_splat(sinf((1.0f - t) * angle) / sinTheta);
+    r2 = wasm_f32x4_splat(sinf(t * angle) / sinTheta);
+    q1 = wasm_f32x4_mul(q1, r1);
+    q2 = wasm_f32x4_mul(q2, r2);
+    glmm_store(dest, wasm_f32x4_add(q1, q2));
+}
+#else
+
 /*!
  * @brief interpolates between two quaternions
  *        using spherical linear interpolation (SLERP)
@@ -274,6 +329,7 @@ glm_quat_slerp_precise(versor from, versor to, float t, versor dest) {
     glm_vec4_add(q1, q2, q1);
     glm_vec4_scale(q1, 1.0f / sinTheta, dest);
 }
+#endif
 
 CGLM_INLINE bool keep_quat_slerp(
     versor left, versor middle, versor right,
