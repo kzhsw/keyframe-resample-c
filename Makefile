@@ -4,6 +4,7 @@ WASMCC?=$(WASI_SDK)/bin/clang
 WASIROOT?=$(WASI_SDK)/share/wasi-sysroot
 WASM_METADCE?=$(dir $(WASM_OPT))wasm-metadce
 WASM_GRAPH=wasm-metadce.json
+WASM_OPT_FLAGS=--strip-debug --strip-producers --strip-target-features
 
 WASM_FLAGS=--target=wasm32-wasi --sysroot=$(WASIROOT) -mexec-model=reactor -fno-ident -Wl,--gc-sections,--no-entry,--initial-memory=65536,-z,stack-size=8192
 
@@ -26,10 +27,10 @@ $(BUILD)/resample_simd.wasm: $(BUILD)/resample_simd.linked.wasm $(WASM_GRAPH)
 	$(WASM_METADCE) $< -f $(WASM_GRAPH) -o $@
 
 $(BUILD)/resample_wasm_o4.wasm: $(BUILD)/resample_wasm.wasm
-	$(WASM_OPT) -O4 --strip-debug -o $@ $^
+	$(WASM_OPT) -O4 $(WASM_OPT_FLAGS) -o $@ $^
 
 $(BUILD)/resample_simd_o4.wasm: $(BUILD)/resample_simd.wasm
-	$(WASM_OPT) -O4 --strip-debug --enable-simd -o $@ $^
+	$(WASM_OPT) -O4 $(WASM_OPT_FLAGS) --enable-simd -o $@ $^
 
 $(BUILD)/%.esm.js: $(BUILD)/%_o4.wasm
 	python3 wasmpack.py esm wasm $^ > $@
