@@ -127,7 +127,7 @@ export function resampleFast(_options = RESAMPLE_DEFAULTS) {
  * @param {import("@gltf-transform/core").AnimationSampler} sampler
  * @param {import("@gltf-transform/core").GLTF.AnimationChannelTargetPath} path
  * @param {typeof RESAMPLE_DEFAULTS} options
- * @param {import('./animation-resample.d.ts').AnimationResampleWrapper} wrapper
+ * @param {import('./resample.d.ts').AnimationResampleWrapper} wrapper
  * @param {import("@gltf-transform/core").ILogger} logger
  */
 function optimize(
@@ -163,7 +163,7 @@ function optimize(
     // const beforeFrames = frames.length;
     // const ts = performance.now();
     if (interpolation === 'LINEAR' && path === 'rotation') {
-        result = w.slerp_quat(frames, values, tolerance);
+        result = wrapper.slerp_quat(frames, values, tolerance);
     } else {
         let elementSize = output.getElementSize();
         if (path === 'weights') {
@@ -185,37 +185,37 @@ function optimize(
         if (interpolation === 'LINEAR') {
             switch (elementSize) {
                 case 1:
-                    result = w.lerp_scalar(frames, values, tolerance);
+                    result = wrapper.lerp_scalar(frames, values, tolerance);
                     break;
                 case 2:
-                    result = w.lerp_vec2(frames, values, tolerance);
+                    result = wrapper.lerp_vec2(frames, values, tolerance);
                     break;
                 case 3:
-                    result = w.lerp_vec3(frames, values, tolerance);
+                    result = wrapper.lerp_vec3(frames, values, tolerance);
                     break;
                 case 4:
-                    result = w.lerp_vec4(frames, values, tolerance);
+                    result = wrapper.lerp_vec4(frames, values, tolerance);
                     break;
                 default:
-                    result = w.lerp_unknown(frames, values, elementSize, tolerance);
+                    result = wrapper.lerp_unknown(frames, values, elementSize, tolerance);
                     break;
             }
         } else if (interpolation === 'STEP') {
             switch (elementSize) {
                 case 1:
-                    result = w.step_scalar(frames, values, tolerance);
+                    result = wrapper.step_scalar(frames, values, tolerance);
                     break;
                 case 2:
-                    result = w.step_vec2(frames, values, tolerance);
+                    result = wrapper.step_vec2(frames, values, tolerance);
                     break;
                 case 3:
-                    result = w.step_vec3(frames, values, tolerance);
+                    result = wrapper.step_vec3(frames, values, tolerance);
                     break;
                 case 4:
-                    result = w.step_vec4(frames, values, tolerance);
+                    result = wrapper.step_vec4(frames, values, tolerance);
                     break;
                 default:
-                    result = w.step_unknown(frames, values, elementSize, tolerance);
+                    result = wrapper.step_unknown(frames, values, elementSize, tolerance);
                     break;
             }
         } else {

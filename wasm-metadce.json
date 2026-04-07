@@ -1,0 +1,18 @@
+[
+  {"name":"memory","export":"memory","root":true},
+  {"name":"get_heap_ptr","export":"get_heap_ptr","root":true},
+  {"name":"stream_continue","export":"stream_continue","root":true},
+  {"name":"step_unknown","export":"step_unknown","root":true},
+  {"name":"lerp_unknown","export":"lerp_unknown","root":true},
+  {"name":"step_scalar","export":"step_scalar","root":true},
+  {"name":"step_vec2","export":"step_vec2","root":true},
+  {"name":"step_vec3","export":"step_vec3","root":true},
+  {"name":"step_vec4","export":"step_vec4","root":true},
+  {"name":"lerp_scalar","export":"lerp_scalar","root":true},
+  {"name":"lerp_vec2","export":"lerp_vec2","root":true},
+  {"name":"lerp_vec3","export":"lerp_vec3","root":true},
+  {"name":"lerp_vec4","export":"lerp_vec4","root":true},
+  {"name":"slerp_quat","export":"slerp_quat","root":true},
+  {"name":"normalize","export":"normalize","root":true},
+  {"name":"denormalize","export":"denormalize","root":true}
+]

@@ -56,7 +56,7 @@ CGLM_INLINE void denormalize_scalar_u(
     for (size_t i = 0; i < count; ++i) {
         float * curr_ptr = ptr;
         for (size_t j = 0; j < size; ++j) {
-            *curr_ptr = fmaxf((*curr_ptr) * (scalar), -1.f);
+            *curr_ptr = (*curr_ptr) * scalar;
             curr_ptr++;
         }
         ptr += stride;
@@ -151,7 +151,7 @@ CGLM_INLINE void normalize_vec3(
 }
 
 #define denormalize_max_i(v, min_val) (v) = wasm_f32x4_pmax((v), (min_val))
-#define denormalize_max_u(v, min_val)
+#define denormalize_max_u(v, min_val) ((void)(min_val))
 #define denormalize_scalar_i(scalar, min_val) *ptr = fmaxf((*ptr) * (scalar), min_val)
 #define denormalize_scalar_u(scalar, min_val) *ptr = (*ptr) * (scalar)
 
@@ -200,7 +200,7 @@ CGLM_INLINE void normalize_vec3(
                                                                                  \
         while (num > 0)                                                          \
         {                                                                        \
-            scalar_fn(DENORMALIZE_I8_SCALAR, -1.f);                              \
+            scalar_fn(scalar, -1.f);                                             \
             ptr++;                                                               \
             num--;                                                               \
         }                                                                        \
@@ -229,7 +229,7 @@ CGLM_INLINE void normalize_vec3(
                                                                                  \
         while (num > 0)                                                          \
         {                                                                        \
-            scalar_fn(DENORMALIZE_I8_SCALAR, -1.f);                              \
+            scalar_fn(scalar, -1.f);                                             \
             ptr++;                                                               \
             num--;                                                               \
         }                                                                        \
@@ -460,6 +460,7 @@ size_t normalize(
         if (size == stride) {
             size_t length = size * count;
             normalize_internal(ptr, length, scalar);
+            return length;
         }
 #if defined(CGLM_SIMD_WASM)
         if (size == 4) {

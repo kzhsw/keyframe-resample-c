@@ -1,4 +1,3 @@
-#include <string.h>
 #include "./cglm/include/cglm/cglm.h"
 
 // #define RESAMPLE_ONLERP_QUAT
@@ -204,7 +203,7 @@ CGLM_INLINE bool keep_unknown_lerp(
     }
     while (size > offset)
     {
-        if (!keep_scalar_lerp(
+        if (keep_scalar_lerp(
                 left + offset, middle + offset, right + offset,
                 t, tolerance))
         {
@@ -319,7 +318,7 @@ CGLM_INLINE bool keep_quat_onlerp(
 #define scalar_copy(src, dest) *(dest) = *(src)
 
 /* value_size here should be defined in outer function */
-#define unknown_copy(src, dest) memcpy(dest, src, value_size)
+#define unknown_copy(src, dest) __builtin_memcpy((dest), (src), value_size * sizeof(float))
 
 #if defined(__wasm__)
 extern unsigned char __heap_base;
@@ -469,9 +468,9 @@ size_t step_unknown(
             if (i != write_index)
             {
                 frames[write_index * frame_stride] = frames[i * frame_stride];
-                memcpy(
-                    &values[write_index * value_stride],
-                    &values[i * value_stride], value_size);
+                unknown_copy(
+                    &values[i * value_stride],
+                    &values[write_index * value_stride]);
             }
             write_index++;
         }
@@ -523,9 +522,9 @@ size_t lerp_unknown(
             if (i != write_index)
             {
                 frames[write_index * frame_stride] = frames[i * frame_stride];
-                memcpy(
-                    &values[write_index * value_stride],
-                    &values[i * value_stride], value_size);
+                unknown_copy(
+                    &values[i * value_stride],
+                    &values[write_index * value_stride]);
             }
             write_index++;
         }
@@ -708,16 +707,16 @@ void test1()
     printf("val=%llu, offset=%lld\n", val, offset);
     float inputBuffer[6];
     float outputBuffer[6];
-    memcpy(inputBuffer, input, val * sizeof(float));
-    memcpy(outputBuffer, output, val * sizeof(float));
+    __builtin_memcpy(inputBuffer, input, val * sizeof(float));
+    __builtin_memcpy(outputBuffer, output, val * sizeof(float));
     size_t write_index = val;
     float input2[] = {4.f, 5.f, 6.f};
     float output2[] = {4.f, 5.f, 6.f};
     val = resample_lerp_scalar(input2, 1, output2, 1, 3, FLT_EPSILON);
     offset = get_offset_ptr();
     write_index += offset;
-    memcpy(inputBuffer + write_index, input2, val * sizeof(float));
-    memcpy(outputBuffer + write_index, output2, val * sizeof(float));
+    __builtin_memcpy(inputBuffer + write_index, input2, val * sizeof(float));
+    __builtin_memcpy(outputBuffer + write_index, output2, val * sizeof(float));
     write_index += val;
     printf("val=%llu, offset=%lld, write_index=%lld\n", val, offset, write_index);
     printf("input={");
@@ -743,16 +742,16 @@ void test2()
     printf("val=%llu, offset=%lld\n", val, offset);
     float inputBuffer[6];
     float outputBuffer[6];
-    memcpy(inputBuffer, input, val * sizeof(float));
-    memcpy(outputBuffer, output, val * sizeof(float));
+    __builtin_memcpy(inputBuffer, input, val * sizeof(float));
+    __builtin_memcpy(outputBuffer, output, val * sizeof(float));
     size_t write_index = val;
     float input2[] = {4.f, 5.f, 6.f};
     float output2[] = {5.f, 5.f, 6.f};
     val = resample_lerp_scalar(input2, 1, output2, 1, 3, FLT_EPSILON);
     offset = get_offset_ptr();
     write_index += offset;
-    memcpy(inputBuffer + write_index, input2, val * sizeof(float));
-    memcpy(outputBuffer + write_index, output2, val * sizeof(float));
+    __builtin_memcpy(inputBuffer + write_index, input2, val * sizeof(float));
+    __builtin_memcpy(outputBuffer + write_index, output2, val * sizeof(float));
     write_index += val;
     printf("val=%llu, offset=%lld, write_index=%lld\n", val, offset, write_index);
     printf("input={");
