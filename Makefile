@@ -1,11 +1,11 @@
 BUILD=build
-CFLAGS=-O3 -DNDEBUG -Wall -flto -std=c11
+CFLAGS=-O3 -DNDEBUG -Wall -std=c11
 WASMCC?=$(WASI_SDK)/bin/clang
 WASIROOT?=$(WASI_SDK)/share/wasi-sysroot
 WASM_METADCE?=$(dir $(WASM_OPT))wasm-metadce
 WASM_GRAPH=wasm-metadce.json
 
-WASM_FLAGS=--target=wasm32-wasi --sysroot=$(WASIROOT) -mexec-model=reactor -fno-builtin -ffreestanding -fno-ident -Wl,--gc-sections,--no-entry,--initial-memory=65536,-z,stack-size=8192
+WASM_FLAGS=--target=wasm32-wasi --sysroot=$(WASIROOT) -mexec-model=reactor -fno-ident -Wl,--gc-sections,--no-entry,--initial-memory=65536,-z,stack-size=8192
 
 WASM_EXPORTS=-Wl,--export=slerp_quat,--export=lerp_vec4,--export=lerp_vec3,--export=lerp_vec2,--export=lerp_scalar,--export=step_vec4,--export=step_vec3,--export=step_vec2,--export=step_scalar,--export=step_unknown,--export=lerp_unknown,--export=denormalize,--export=normalize,--export=stream_continue,--export=get_heap_ptr
 
